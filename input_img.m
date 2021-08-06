@@ -1,13 +1,15 @@
 clc;
 clear;
 
+
 action = 'test';       % 'training' 'valid' 'test'
+
 train_test_data_slices = ['../Dataset/', action, '_data/', action, '_data_nii/slices/'];
 train_test_data_masks =  ['../Dataset/', action, '_data/', action, '_data_nii/masks/'];
+disp(train_test_data_slices)
 
 slices_nii_folder=dir(train_test_data_slices);
 slices_nii_file={slices_nii_folder.name};
-disp(slices_nii_file)
 % Traverse all .nii.gz file
 for num_nii = 4 : length(slices_nii_file)
     
@@ -16,8 +18,8 @@ for num_nii = 4 : length(slices_nii_file)
     case_name = case_name(1 : end-7);
     
     finishing = [num2str(num_nii-3),'/',num2str(length(slices_nii_file)-3)];
-    disp(finishing)
-    disp(case_name)
+     disp(finishing)
+     disp(case_name)
     
     v_slices = load_untouch_nii([train_test_data_slices, case_name, '.nii.gz']);  
     v_masks = load_untouch_nii([train_test_data_masks, case_name, '.manual.mask.nii.gz']);
@@ -41,8 +43,8 @@ for num_nii = 4 : length(slices_nii_file)
     end
     
 %% 
-    slices_destination_path = ['../Dataset/', action, '_data/', action, '_data_mat/slices/'];
-    masks_destination_path = ['../Dataset/', action, '_data/', action, '_data_mat/masks/'];  
+    slices_destination_path = ['../Dataset/', action, '_data/', action, '_data_bmp/slices/'];
+    masks_destination_path = ['../Dataset/', action, '_data/', action, '_data_bmp/masks/'];  
     mkdir(slices_destination_path);
     mkdir(masks_destination_path);
 %% classify into two categories    
@@ -95,97 +97,18 @@ function [] = save_preprocessed_images(slices, mask, slices_destination_path, ma
  % center crop to 256x256 square
     slices = center_crop(slices, n1, n2, n3);
     mask = center_crop(mask, n1, n2, n3);   
-    easy_sort = 100000;
-    zeros_slice = zeros(size(slices, 1), size(slices, 2));
-    for i = 1 : size(slices, 3)
-        if i == 1                
-            imageSlice_0 = slices(:, :, i);
-            maskSlice_0 = mask(:, :, i);
-            for j = 1 : 4
-                images_temp(j, :, :) = zeros_slice;
-                masks_to_save(j, :, :) = zeros_slice;
-            end   
-            images_temp(5, :, :) = imageSlice_0; 
-            masks_to_save(5, :, :) = maskSlice_0;
-            images_to_save = repmat(images_temp, [1, 1, 1, 3]);  
-                  
-        elseif i == 2            
-            imageSlice_0 = slices(:, :, i);
-            maskSlice_0 = mask(:, :, i);
-            imageSlice_n1 = slices(:, :, i-1);
-            maskSlice_n1 = mask(:, :, i-1);
-            for j = 1 : 3
-                images_temp(j, :, :) = zeros_slice;
-                masks_to_save(j, :, :) = zeros_slice;
-            end   
-            images_temp(4, :, :) = imageSlice_n1; 
-            masks_to_save(4, :, :) = maskSlice_n1;
-            images_temp(5, :, :) = imageSlice_0; 
-            masks_to_save(5, :, :) = maskSlice_0;
-            images_to_save = repmat(images_temp, [1, 1, 1, 3]);
-        elseif i == 3
-            imageSlice_0 = slices(:, :, i);
-            maskSlice_0 = mask(:, :, i);
-            imageSlice_n1 = slices(:, :, i-1);
-            maskSlice_n1 = mask(:, :, i-1);
-            imageSlice_n2 = slices(:, :, i-2);
-            maskSlice_n2 = mask(:, :, i-2);
-            for j = 1 : 2
-                images_temp(j, :, :) = zeros_slice;
-                masks_to_save(j, :, :) = zeros_slice;
-            end   
-            images_temp(3, :, :) = imageSlice_n2; 
-            masks_to_save(3, :, :) = maskSlice_n2;
-            images_temp(4, :, :) = imageSlice_n1; 
-            masks_to_save(4, :, :) = maskSlice_n1;
-            images_temp(5, :, :) = imageSlice_0; 
-            masks_to_save(5, :, :) = maskSlice_0;
-            images_to_save = repmat(images_temp, [1, 1, 1, 3]);
-        elseif i == 4
-            imageSlice_0 = slices(:, :, i);
-            maskSlice_0 = mask(:, :, i);
-            imageSlice_n1 = slices(:, :, i-1);
-            maskSlice_n1 = mask(:, :, i-1);
-            imageSlice_n2 = slices(:, :, i-2);
-            maskSlice_n2 = mask(:, :, i-2);
-            imageSlice_n3 = slices(:, :, i-3);
-            maskSlice_n3 = mask(:, :, i-3);
-            images_temp(1, :, :) = zeros_slice;
-            masks_to_save(1, :, :) = zeros_slice;   
-            images_temp(2, :, :) = imageSlice_n3; 
-            masks_to_save(2, :, :) = maskSlice_n3;
-            images_temp(3, :, :) = imageSlice_n2; 
-            masks_to_save(3, :, :) = maskSlice_n2;
-            images_temp(4, :, :) = imageSlice_n1; 
-            masks_to_save(4, :, :) = maskSlice_n1;
-            images_temp(5, :, :) = imageSlice_0; 
-            masks_to_save(5, :, :) = maskSlice_0;
-            images_to_save = repmat(images_temp, [1, 1, 1, 3]);
-        else
-            imageSlice_0 = slices(:, :, i);
-            maskSlice_0 = mask(:, :, i);
-            imageSlice_n1 = slices(:, :, i-1);
-            maskSlice_n1 = mask(:, :, i-1);
-            imageSlice_n2 = slices(:, :, i-2);
-            maskSlice_n2 = mask(:, :, i-2);
-            imageSlice_n3 = slices(:, :, i-3);
-            maskSlice_n3 = mask(:, :, i-3);
-            imageSlice_n4 = slices(:, :, i-4);
-            maskSlice_n4 = mask(:, :, i-4);
-            images_temp(1, :, :) = imageSlice_n4;
-            masks_to_save(1, :, :) = maskSlice_n4;   
-            images_temp(2, :, :) = imageSlice_n3; 
-            masks_to_save(2, :, :) = maskSlice_n3;
-            images_temp(3, :, :) = imageSlice_n2; 
-            masks_to_save(3, :, :) = maskSlice_n2;
-            images_temp(4, :, :) = imageSlice_n1; 
-            masks_to_save(4, :, :) = maskSlice_n1;
-            images_temp(5, :, :) = imageSlice_0; 
-            masks_to_save(5, :, :) = maskSlice_0;
-            images_to_save = repmat(images_temp, [1, 1, 1, 3]);
-        end
-        save([slices_destination_path prefix '_' num2str(easy_sort + i) '.mat'], 'images_to_save');       
-        save([masks_destination_path prefix '_' num2str(easy_sort + i) '.mat'], 'masks_to_save');
+    
+    slicesPerImage = 1;
+    easy_sort = 10000;
+    for s = size(slices, 3):-slicesPerImage:1
+        startSlice = max([1, (s - slicesPerImage + 1)]);
+        imageSlices = slices(:, :, startSlice:(startSlice + slicesPerImage - 1));
+        maskSlices = mask(:, :, startSlice:(startSlice + slicesPerImage - 1));
+        imageSlices = repmat(imageSlices,[1,1,3]);
+        maskSlices(maskSlices==255) = 1;
+        %saveastiff(imageSlices, [slices_destination_path prefix '_' num2str(easy_sort + startSlice) '.tif']);
+        imwrite(imageSlices, [slices_destination_path prefix '_' num2str(easy_sort + startSlice) '.bmp'], 'bmp');       
+        imwrite(maskSlices, [masks_destination_path prefix '_' num2str(easy_sort + startSlice) '.bmp'], 'bmp');
     end
 
 end
@@ -222,4 +145,3 @@ function [ image ] = center_crop(image, n1, n2, n3)
         image = imcrop3(image, win1);  
     end
 end
-

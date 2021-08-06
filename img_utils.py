@@ -11,5 +11,3 @@ def imsave(image, path):
             if k < 2:
                 images[j_, k_] = label_colours[int(k)]
     imageio.imwrite(path, images)
-
-

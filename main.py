@@ -1,74 +1,43 @@
-import os
-import time
-import argparse
-import numpy as np
 import tensorflow as tf
+import argparse
+import os
 from actions import Actions
-def configure():
 
+
+def configure():
     flags = tf.app.flags
-    
-    #————————————————————————————--—————————————————————————# 
-    flags.DEFINE_string('network_name', 'acmdenseunet', 'Use which framework:  unet, denseunet, deeplabv3plus')
-    
-    flags.DEFINE_integer('max_epoch', 100001, '# of step in an epoch')  # 100001
-    flags.DEFINE_integer('test_step', 1000, '# of step to test a model')
-    flags.DEFINE_integer('save_step', 1000, '# of step to save a model')
-    
-    flags.DEFINE_integer('valid_start_epoch', 1,'start step to test a model')
-    flags.DEFINE_integer('valid_end_epoch', 100001, 'end step to test a model')
-    flags.DEFINE_integer('valid_stride_of_epoch',1000, 'stride to test a model')
-    flags.DEFINE_string('model_name', 'model', 'Model file name')
-    flags.DEFINE_integer('reload_epoch', 0, 'Reload epoch')
-    flags.DEFINE_integer('test_epoch', 99001, 'Test or predict epoch')
-    flags.DEFINE_integer('random_seed', int(time.time()), 'random seed')
-    
-    flags.DEFINE_integer('summary_step', 10000000, '# of step to save the summary')
-    #—————————————————————————————————————————————————————# 
-    
+
+    flags.DEFINE_integer('batch', 4, 'batch_size')
+    flags.DEFINE_integer('height', 256, 'height of the slices')
+    flags.DEFINE_integer('width', 256, 'width of the slices')
+    flags.DEFINE_integer('depth', 5, 'depth of the slices')
+    flags.DEFINE_integer('channel', 3, 'channel')
+    flags.DEFINE_integer('start_slice_num', 0, 'start_slice')
+
+    flags.DEFINE_integer('test_num', 3039, 'number of test slices')
+
+    flags.DEFINE_string('logdir', '../network/log/', 'path to log of model')
+    flags.DEFINE_string('model_dir', '../network/model/', 'path to model')
+    flags.DEFINE_string('record_dir', '../network/record/', 'path to record')
+
+    flags.DEFINE_string('data_dir', '../Dataset/h5py/', 'path to dataset')
+    flags.DEFINE_string('pred_dir', '../predictions/', 'path to predictions')
+    flags.DEFINE_string('train_data', 'training_data.hdf5', 'training data')
+    flags.DEFINE_string('valid_data', 'valid_data.hdf5', 'valid data')
+    flags.DEFINE_string('test_data', 'test_data.hdf5', 'test data')
+
+    flags.DEFINE_integer('max_epoch', 30001, 'num of epoch')
+    flags.DEFINE_integer('test_epoch', 29001, 'choose epoch for testing')
+    flags.DEFINE_integer('valid_step', 1000, 'step to valid')
+    flags.DEFINE_integer('save_step', 1000, 'step to save')
+
     flags.DEFINE_float('learning_rate', 1e-3, 'learning rate')
     flags.DEFINE_float('beta1', 0.9, 'beta1')
     flags.DEFINE_float('beta2', 0.99, 'beta2')
     flags.DEFINE_float('epsilon', 1e-8, 'epsilon')
- 
-    flags.DEFINE_integer('gpu_num', 1, 'the number of GPU')
-    #—————————————————————————————————————————————————————# 
-    flags.DEFINE_string('data_dir', '../Dataset/h5py/', 'Name of data directory')
-    flags.DEFINE_string('train_data', 'training_data.hdf5', 'Training data')
-    flags.DEFINE_string('valid_data', 'valid_data.hdf5', 'Validation data')
-    flags.DEFINE_string('test_data', 'test_data.hdf5', 'Testing data')
-    flags.DEFINE_integer('valid_num',3840,'the number of images in the validing set')
-    flags.DEFINE_integer('test_num',1280,'the number of images in the testing set')  # add test data bs:2907, cc: 4800
-    flags.DEFINE_integer('batch', 4, 'batch size')              # 4
-    flags.DEFINE_integer('batchsize', 4, 'total batch size')     # 4
-    flags.DEFINE_integer('channel', 3, 'channel size')
-    flags.DEFINE_integer('height', 256, 'height size')
-    flags.DEFINE_integer('width', 256, 'width size')
-    flags.DEFINE_boolean('is_training', True, '是否训练') 
-    flags.DEFINE_integer('class_num', 2, 'output class number')
-    #————————————————————————————-—————————————————————————#
-    flags.DEFINE_string('network_dir', '../network4/', 'network_dir')
-    flags.DEFINE_string('logdir', '../network4/logdir/', 'Log dir')
-    flags.DEFINE_string('modeldir', '../network4/modeldir/', 'Model dir')
-    flags.DEFINE_string('sample_dir', '../network4/samples/', 'Sample directory')
-    flags.DEFINE_string('sample_net_dir', '../network4/samples_net/', 'Sample directory')
-    flags.DEFINE_string('record_dir', '../network4/record/', 'Experiment record directory')
-    #————————————————————————————-—————————————————————————# 
-    flags.DEFINE_boolean('use_asc', False, 'use ASC or not')
-    flags.DEFINE_string('down_conv_name', 'conv2d', 'Use which conv op: conv2d, deform_conv2d, adaptive_conv2d, adaptive_separate_conv2d')
-    flags.DEFINE_string('bottom_conv_name', 'conv2d', 'Use which conv op: conv2d, deform_conv2d, adaptive_conv2d')
-    flags.DEFINE_string('up_conv_name', 'conv2d', 'Use which conv op: conv2d, deform_conv2d, adaptive_conv2d')
-   
-    flags.DEFINE_string('deconv_name', 'deconv', 'Use which deconv op: deconv')
-      
+
     flags.FLAGS.__dict__['__parsed'] = False
     return flags.FLAGS
-
-
-# ———————————————————————————— train —————————————————————————#
-"""
-函数功能：训练
-"""
 
 
 def train():
@@ -76,87 +45,26 @@ def train():
     model.train()
 
 
-# ———————————————————————————— valid —————————————————————————#
-"""
-函数功能：验证
-"""
-
-
-def valid():
-    valid_loss = []
-    valid_accuracy = []
-    valid_m_iou = []
-    valid_dice = []
-    conf = configure()
-    model = Actions(sess, conf)
-    for i in range(conf.valid_start_epoch, conf.valid_end_epoch, conf.valid_stride_of_epoch):
-        loss, acc, m_iou, dice = model.test(i)
-        valid_loss.append(loss)
-        valid_accuracy.append(acc)
-        valid_m_iou.append(m_iou)
-        valid_dice.append(dice)
-        np.save(conf.record_dir + "validate_loss.npy", np.array(valid_loss))
-        np.save(conf.record_dir + "validate_accuracy.npy", np.array(valid_accuracy))
-        np.save(conf.record_dir + "validate_m_iou.npy", np.array(valid_m_iou))
-        np.save(conf.record_dir + "validate_dice.npy", np.array(valid_dice))
-        print('valid_loss', valid_loss)
-        print('valid_accuracy', valid_accuracy)
-        print('valid_m_iou', valid_m_iou)
-        print('valid_dice', valid_dice)
-
-
-# ———————————————————————————— predict —————————————————————————#
-"""
-函数功能：测试
-"""
-
-
 def predict():
-    predict_loss = []
-    predict_accuracy = []
-    predict_dice = []
     model = Actions(sess, configure())
-    loss, acc, dice = model.predict()
-    predict_loss.append(loss)
-    predict_accuracy.append(acc)
-    predict_dice.append(dice)
-    print('predict_loss', predict_loss)
-    print('predict_accuracy', predict_accuracy)
-    print('predict_dice', predict_dice)
-
-
-# ———————————————————————————— main —————————————————————————#
-"""
-函数功能：主函数，设置不同的action
-"""
+    model.predict()
 
 
 def main(argv):
-    start = time.clock()
     parser = argparse.ArgumentParser()
-    parser.add_argument('--action', dest='action', type=str, default='train',
-                        help='actions: train, test, or predict')
+    parser.add_argument('--action', dest='action', type=str, default='train', help='train or predict')
     args = parser.parse_args()
-    if args.action not in ['train', 'test', 'predict']:
+    if args.action not in ['train', 'predict']:
         print('invalid action: ', args.action)
-        print("Please input a action: train, test, or predict")
-    # test
-    elif args.action == 'test':
-        valid()
-    # predict
+        print('Please input a action: train or predict')
     elif args.action == 'predict':
         predict()
-    # train
     else:
         train()
-    end = time.clock()
-    print("program total running time", (end - start) / 60)
 
 
-# ———————————————————————————— GPU设置 —————————————————————————#
 if __name__ == '__main__':
     os.environ['CUDA_VISIBLE_DEVICES'] = '0'
-    os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
     config = tf.ConfigProto(allow_soft_placement=True, log_device_placement=True)
     config.gpu_options.allow_growth = True
     sess = tf.Session(config=config)

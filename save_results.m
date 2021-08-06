@@ -1,8 +1,38 @@
 clc;
 clear;
 
-prediction_path = '../png_pred_results_densenet/';
-save_path = '../pred_nii_bsdata_densenet/dl_pred_nii/';
+% masks' path
+masks_path = '../Dataset/test_data/test_data_bmp/masks/'; % mask 
+preds_path = '../predictions/';     % pred of the network
+final_preds_path = '../png_pred_results_lstm/'; % classified by name
+save_path = '../pred_compare/2p5d_lstm/';  % nii 
+
+masks_folder=dir(masks_path);
+masks_file= {masks_folder.name};
+i = 0;  % index for the pred masks 
+for num_masks = 3 : length(masks_file)
+    
+    mask_name = masks_file(num_masks);
+   	mask = imread([masks_path char(mask_name)]);
+    pred_path_name = [preds_path, num2str(i), '.png'];
+    %%%%%%
+    pred = im2gray(imread(pred_path_name));
+    pred = imbinarize(pred); 
+    %pred = bwareaopen(pred, 50);
+    pred = imfill(pred, 'holes');
+   
+    case_name = char(mask_name);
+    case_name = case_name(1:end-10);
+    if exist([final_preds_path case_name, '/'],'dir')==0
+        mkdir([final_preds_path case_name, '/']);
+    end
+    imwrite(pred, [final_preds_path case_name, '/', char(mask_name)]);
+    disp([final_preds_path case_name, '/', char(mask_name)]);
+    i = i+1;    
+end
+
+
+prediction_path = final_preds_path;
 pred_folder= dir(prediction_path);
 pred_file={pred_folder.name};
 
@@ -116,6 +146,3 @@ function [ image ] = get_original_size(image, n1, n2)
         end   
     end
 end
-
-
-
