@@ -1,5 +1,7 @@
 import tensorflow as tf
 import ops
+from tensorflow import keras
+from tensorflow.keras import layers
 
 
 class UNet(object):
@@ -42,12 +44,37 @@ class UNet(object):
             conv1_var = ops.conv2d(outputs_var, rate_field, 96, (3, 3), name + '/conv3', is_train=False, norm=False, reuse=True)
             conv1_var = tf.expand_dims(conv1_var, 1)
             conv1_lstm = tf.concat([conv1_lstm, conv1_var], 1)
-        print('conv1_lstm shape: ', conv1_lstm.get_shape())
-        lstm_inputs_0 = conv1_lstm
-        cell0 = tf.contrib.rnn.ConvLSTMCell(conv_ndims=2, input_shape=[128, 128, 96], output_channels=96, kernel_shape=[3, 3])
-        initial_state = cell0.zero_state(batch_size=self.conf.batch, dtype=tf.float32)
-        output, final_state = tf.nn.dynamic_rnn(cell0, lstm_inputs_0, dtype=tf.float32, time_major=False, initial_state=initial_state, scope='rnn0')
-        conv1 = conv1 + final_state.h
+        print('conv1_lstm shape: ', conv1_lstm.get_shape())      # use 4 slices as the input of the LSTM
+        # We will construct 3 `ConvLSTM2D` layers with batch normalization
+        x = layers.ConvLSTM2D(
+            filters=64,
+            kernel_size=(5, 5),
+            padding="same",
+            return_sequences=True,
+            activation="relu",
+            data_format='channels_last'
+        )(conv1_lstm)
+        x = layers.BatchNormalization()(x)
+        x = layers.ConvLSTM2D(
+            filters=64,
+            kernel_size=(3, 3),
+            padding="same",
+            return_sequences=True,
+            activation="relu",
+            data_format='channels_last'
+        )(x)
+        x = layers.BatchNormalization()(x)
+        x = layers.ConvLSTM2D(
+            filters=64,
+            kernel_size=(1, 1),
+            padding="same",
+            return_sequences=False,
+            activation="relu",
+            data_format='channels_last'
+        )(x)
+        x = ops.conv2d(x, rate_field, 96, (3, 3), name + '/lstm_conv33', is_train=self.is_train, norm=False)
+        print('xxxxxxxxxxxxxxx: ', x.get_shape())
+        conv1 = conv1 + x
         # == +++++++++++++++++++++++++++++++++++++++++++++
 
         print('conv1:              ', conv1.get_shape())
@@ -292,11 +319,36 @@ class UNet(object):
             up4_temp = tf.expand_dims(up4_temp, 1)
             up4_lstm = tf.concat([up4_lstm, up4_temp], 1)
         print('up4_lstm shape: ', up4_lstm.get_shape())
-        lstm_inputs_up4 = up4_lstm
-        cell_up4 = tf.contrib.rnn.ConvLSTMCell(conv_ndims=2, input_shape=[128, 128, 96], output_channels=96, kernel_shape=[3, 3])
-        initial_state = cell_up4.zero_state(batch_size=self.conf.batch, dtype=tf.float32)
-        output, final_state = tf.nn.dynamic_rnn(cell_up4, lstm_inputs_up4, dtype=tf.float32, time_major=False, initial_state=initial_state, scope='rnn_up4')
-        outputs = outputs + final_state.h
+        # We will construct 3 `ConvLSTM2D` layers with batch normalization
+        x = layers.ConvLSTM2D(
+            filters=64,
+            kernel_size=(5, 5),
+            padding="same",
+            return_sequences=True,
+            activation="relu",
+            data_format='channels_last'
+        )(up4_lstm)
+        x = layers.BatchNormalization()(x)
+        x = layers.ConvLSTM2D(
+            filters=64,
+            kernel_size=(3, 3),
+            padding="same",
+            return_sequences=True,
+            activation="relu",
+            data_format='channels_last'
+        )(x)
+        x = layers.BatchNormalization()(x)
+        x = layers.ConvLSTM2D(
+            filters=64,
+            kernel_size=(1, 1),
+            padding="same",
+            return_sequences=False,
+            activation="relu",
+            data_format='channels_last'
+        )(x)
+        x = ops.conv2d(x, rate_field, 96, (3, 3), name + '/lstm_conv33_up', is_train=self.is_train, norm=False)
+        print('xxxxxxxxxxxxxxx: ', x.get_shape())
+        outputs = outputs + x
         print('up-sampling layer 4 with lstm:          ', outputs.get_shape())
         # == +++++++++++++++++++++++++++++++++++++++++++++
 
