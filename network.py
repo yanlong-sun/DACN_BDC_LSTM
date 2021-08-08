@@ -1,7 +1,5 @@
 import tensorflow as tf
 import ops
-from tensorflow import keras
-from tensorflow.keras import layers
 
 
 class UNet(object):
@@ -46,7 +44,7 @@ class UNet(object):
             conv1_lstm = tf.concat([conv1_lstm, conv1_var], 1)
         print('conv1_lstm shape: ', conv1_lstm.get_shape())      # use 4 slices as the input of the LSTM
         # We will construct 3 `ConvLSTM2D` layers with batch normalization
-        x = layers.ConvLSTM2D(
+        x = tf.contrib.keras.layers.ConvLSTM2D(
             filters=64,
             kernel_size=(5, 5),
             padding="same",
@@ -54,8 +52,8 @@ class UNet(object):
             activation="relu",
             data_format='channels_last'
         )(conv1_lstm)
-        x = layers.BatchNormalization()(x)
-        x = layers.ConvLSTM2D(
+        x = tf.contrib.layers.batch_norm(x)
+        x = tf.contrib.keras.layers.ConvLSTM2D(
             filters=64,
             kernel_size=(3, 3),
             padding="same",
@@ -63,8 +61,8 @@ class UNet(object):
             activation="relu",
             data_format='channels_last'
         )(x)
-        x = layers.BatchNormalization()(x)
-        x = layers.ConvLSTM2D(
+        x = tf.contrib.layers.batch_norm(x)
+        x = tf.contrib.keras.layers.ConvLSTM2D(
             filters=64,
             kernel_size=(1, 1),
             padding="same",
@@ -320,7 +318,7 @@ class UNet(object):
             up4_lstm = tf.concat([up4_lstm, up4_temp], 1)
         print('up4_lstm shape: ', up4_lstm.get_shape())
         # We will construct 3 `ConvLSTM2D` layers with batch normalization
-        x = layers.ConvLSTM2D(
+        x = tf.contrib.keras.layers.ConvLSTM2D(
             filters=64,
             kernel_size=(5, 5),
             padding="same",
@@ -328,8 +326,8 @@ class UNet(object):
             activation="relu",
             data_format='channels_last'
         )(up4_lstm)
-        x = layers.BatchNormalization()(x)
-        x = layers.ConvLSTM2D(
+        x = tf.contrib.layers.batch_norm(x)
+        x = tf.contrib.keras.layers.ConvLSTM2D(
             filters=64,
             kernel_size=(3, 3),
             padding="same",
@@ -337,8 +335,8 @@ class UNet(object):
             activation="relu",
             data_format='channels_last'
         )(x)
-        x = layers.BatchNormalization()(x)
-        x = layers.ConvLSTM2D(
+        x = tf.contrib.layers.batch_norm(x)
+        x = tf.contrib.keras.layers.ConvLSTM2D(
             filters=64,
             kernel_size=(1, 1),
             padding="same",
