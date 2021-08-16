@@ -46,11 +46,11 @@ class UNet(object):
         # We will construct 3 `ConvLSTM2D` layers with batch normalization
         x = tf.contrib.keras.layers.ConvLSTM2D(
             filters=64,
-            kernel_size=(5, 5),
+            kernel_size=(3, 3),
             padding="same",
             return_sequences=True,
-            activation="relu",
-            data_format='channels_last'
+            go_backwards=True,
+            activation="relu"
         )(conv1_lstm)
         x = tf.contrib.layers.batch_norm(x)
         x = tf.contrib.keras.layers.ConvLSTM2D(
@@ -58,17 +58,17 @@ class UNet(object):
             kernel_size=(3, 3),
             padding="same",
             return_sequences=True,
-            activation="relu",
-            data_format='channels_last'
+            go_backwards=True,
+            activation="relu"
         )(x)
         x = tf.contrib.layers.batch_norm(x)
         x = tf.contrib.keras.layers.ConvLSTM2D(
             filters=64,
-            kernel_size=(1, 1),
+            kernel_size=(3, 3),
             padding="same",
             return_sequences=False,
-            activation="relu",
-            data_format='channels_last'
+            go_backwards=True,
+            activation="relu"
         )(x)
         x = ops.conv2d(x, rate_field, 96, (3, 3), name + '/lstm_conv33', is_train=self.is_train, norm=False)
         print('xxxxxxxxxxxxxxx: ', x.get_shape())
@@ -320,11 +320,11 @@ class UNet(object):
         # We will construct 3 `ConvLSTM2D` layers with batch normalization
         x = tf.contrib.keras.layers.ConvLSTM2D(
             filters=64,
-            kernel_size=(5, 5),
+            kernel_size=(3, 3),
             padding="same",
             return_sequences=True,
-            activation="relu",
-            data_format='channels_last'
+            go_backwards=True,
+            activation="relu"
         )(up4_lstm)
         x = tf.contrib.layers.batch_norm(x)
         x = tf.contrib.keras.layers.ConvLSTM2D(
@@ -332,17 +332,17 @@ class UNet(object):
             kernel_size=(3, 3),
             padding="same",
             return_sequences=True,
-            activation="relu",
-            data_format='channels_last'
+            go_backwards=True,
+            activation="relu"
         )(x)
         x = tf.contrib.layers.batch_norm(x)
         x = tf.contrib.keras.layers.ConvLSTM2D(
             filters=64,
-            kernel_size=(1, 1),
+            kernel_size=(3, 3),
             padding="same",
             return_sequences=False,
-            activation="relu",
-            data_format='channels_last'
+            go_backwards=True,
+            activation="relu"
         )(x)
         x = ops.conv2d(x, rate_field, 96, (3, 3), name + '/lstm_conv33_up', is_train=self.is_train, norm=False)
         print('xxxxxxxxxxxxxxx: ', x.get_shape())

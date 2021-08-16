@@ -22,7 +22,7 @@ def get_file(path, rule='.bmp'):
 
 if __name__ == '__main__':
     paths = get_file(path, rule='.bmp')
-    imgs10 = np.empty([10, 256, 256], dtype=int)
+    imgs10 = np.empty([10, 256, 256], dtype=np.uint8)
     i = 0
     for ims in paths:
         file_name = ims.strip(path)
@@ -30,9 +30,9 @@ if __name__ == '__main__':
         im2 = np.squeeze(np.array(im1[:, :, 0]))
         imgs10[i, :, :] = im2
         i += 1
-        if i == 9:
+        if i == 10:
             save_path = out_path + file_name + '.npy'
-            #print(save_path)
+            print(save_path)
             np.save(save_path, imgs10)
             i = 0
             imgs10 = np.empty([10, 256, 256], dtype=int)
