@@ -44,6 +44,7 @@ class UNet(object):
             conv1_lstm = tf.concat([conv1_lstm, conv1_var], 1)
         print('conv1_lstm shape: ', conv1_lstm.get_shape())      # use 4 slices as the input of the LSTM
         # We will construct 3 `ConvLSTM2D` layers with batch normalization
+        """
         x = tf.contrib.keras.layers.ConvLSTM2D(
             filters=64,
             kernel_size=(3, 3),
@@ -76,7 +77,7 @@ class UNet(object):
         # == +++++++++++++++++++++++++++++++++++++++++++++
 
         print('conv1:              ', conv1.get_shape())
-
+        """
         # -------------------------------------------------- #
         # 3: pooling
         outputs = ops.max_pool_2d(conv1, (3, 3), name + '/max_pool')
