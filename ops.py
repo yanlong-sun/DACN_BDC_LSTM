@@ -1,6 +1,35 @@
 import tensorflow as tf
 
 
+def convlstm2d(inputs, filters, kernel_size, stride=1, padding='SAME', data_format='channels_last',
+               go_backwards=False, return_sequences=True):
+    outputs = tf.keras.layers.ConvLSTM2D(filters, kernel_size, stride, data_format=data_format, padding=padding,
+                                         go_backwards=go_backwards, return_sequences=return_sequences)(inputs)
+    return outputs
+
+
+def max_pool_3d(inputs, pool_size=(1, 2, 2), padding='same', strides=None, data_format='channels_last'):
+    outputs = tf.keras.layers.MaxPool3D(pool_size, padding=padding, strides=strides, data_format=data_format)(inputs)
+
+    return outputs
+
+
+def upsamping2d(inputs, size=(2, 2), interpolation='bilinear'):
+    outputs = tf.keras.layers.UpSampling2D(size=size, interpolation=interpolation)(inputs)
+    return outputs
+
+
+def conv2d(inputs, filters, kernel_size=3, padding='SAME', data_format='channels_last'):
+    outputs = tf.keras.layers.Conv2D(filters=filters, kernel_size=kernel_size,
+                                     padding=padding, data_format=data_format)(inputs)
+    return outputs
+
+
+
+
+
+
+"""
 def conv2d(inputs, rate_field, num_outputs, kernel_size, scope, stride=1, rate=1,
            is_train=True, bias=True, norm=True, activation=True, d_format='NHWC', reuse=False):
     # bias
@@ -36,3 +65,4 @@ def avg_pool_2d(inputs, kernel_size, scope, stride=2, padding='SAME', data_forma
                                            scope=scope + '/avg_pool', padding=padding, data_format=data_format)
 
     return outputs
+"""

@@ -49,7 +49,7 @@ class Actions(object):
 
         # load network
         model = UNet(self.sess, self.conf, self.is_train)
-        self.outputs, self.rates = model.inference(self.inputs)
+        self.outputs = model.inference(self.inputs)
 
         ###
         shape1 = one_hot_annotations.shape
