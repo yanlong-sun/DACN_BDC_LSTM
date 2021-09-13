@@ -48,46 +48,46 @@ class UNet(object):
 
         # down sampling 5
         outputs = ops.convlstm2d(outputs, 512, 3)
-        outputs = ops.convlstm2d(outputs, 512, 3, return_sequences=False)
+        outputs = ops.convlstm2d(outputs, 512, 3)
         print('down_sampling5:  ', outputs.get_shape())
 
         # up sampling 1
-        outputs = ops.upsamping2d(outputs)
-        up1 = ops.conv2d(outputs, 256)
-        outputs = up1 + down4[:, 4, :, :, :]
-        outputs = ops.conv2d(outputs, 256)
+        outputs = ops.upsamping3d(outputs)
+        up1 = ops.convlstm2d(outputs, 256, 3)
+        outputs = up1 + down4
+        outputs = ops.convlstm2d(outputs, 256, 3)
         print('up_sampling1:    ', outputs.get_shape())
 
         # up sampling 2
-        outputs = ops.upsamping2d(outputs)
-        up2 = ops.conv2d(outputs, 128)
-        outputs = up2 + down3[:, 4, :, :, :]
-        outputs = ops.conv2d(outputs, 128)
+        outputs = ops.upsamping3d(outputs)
+        up2 = ops.convlstm2d(outputs, 128, 3)
+        outputs = up2 + down3
+        outputs = ops.convlstm2d(outputs, 128, 3)
         print('up_sampling2:    ', outputs.get_shape())
 
         # up sampling 3
-        outputs = ops.upsamping2d(outputs)
-        up3 = ops.conv2d(outputs, 64)
-        outputs = up3 + down2[:, 4, :, :, :]
-        outputs = ops.conv2d(outputs, 64)
+        outputs = ops.upsamping3d(outputs)
+        up3 = ops.convlstm2d(outputs, 64, 3)
+        outputs = up3 + down2
+        outputs = ops.convlstm2d(outputs, 64, 3)
         print('up_sampling3:    ', outputs.get_shape())
 
         # up sampling 4
-        outputs = ops.upsamping2d(outputs)
-        up4 = ops.conv2d(outputs, 32)
-        outputs = up4 + down1[:, 4, :, :, :]
-        outputs = ops.conv2d(outputs, 32)
+        outputs = ops.upsamping3d(outputs)
+        up4 = ops.convlstm2d(outputs, 32, 3)
+        outputs = up4 + down1
+        outputs = ops.convlstm2d(outputs, 32, 3)
         print('up_sampling4:    ', outputs.get_shape())
 
         # outputs
 
-        branch1 = ops.conv2d(outputs, 32)
-        branch1 = ops.conv2d(branch1, 1)
-        branch2 = ops.conv2d(outputs, 32)
-        branch2 = ops.conv2d(branch2, 1)
-        branch3 = ops.conv2d(outputs, 32)
-        branch3 = ops.conv2d(branch3, 2)
-        outputs = tf.concat([branch1, branch2, branch3], 3)
+        branch1 = ops.convlstm2d(outputs, 32, 3)
+        branch1 = ops.convlstm2d(branch1, 1, 3)
+        branch2 = ops.convlstm2d(outputs, 32, 3)
+        branch2 = ops.convlstm2d(branch2, 1, 3)
+        branch3 = ops.convlstm2d(outputs, 32, 3)
+        branch3 = ops.convlstm2d(branch3, 2, 3)
+        outputs = tf.concat([branch1[:, 4, :, :, :], branch2[:, 4, :, :, :], branch3[:, 4, :, :, :]], 3)
         print('outputs_shape:   ', outputs.get_shape())
 
         return outputs

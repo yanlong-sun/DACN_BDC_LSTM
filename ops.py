@@ -14,8 +14,8 @@ def max_pool_3d(inputs, pool_size=(1, 2, 2), padding='same', strides=None, data_
     return outputs
 
 
-def upsamping2d(inputs, size=(2, 2), interpolation='bilinear'):
-    outputs = tf.keras.layers.UpSampling2D(size=size, interpolation=interpolation)(inputs)
+def upsamping3d(inputs, size=(1, 2, 2), data_format='channels_last'):
+    outputs = tf.keras.layers.UpSampling3D(size=size, data_format=data_format)(inputs)
     return outputs
 
 

@@ -2,7 +2,7 @@ clc;
 clear;
 
 
-action = 'test';       % 'training' 'valid' 'test'
+action = 'valid';       % 'training' 'valid' 'test'
 
 train_test_data_slices = ['../Dataset/', action, '_data/', action, '_data_nii/slices/'];
 train_test_data_masks =  ['../Dataset/', action, '_data/', action, '_data_nii/masks/'];
@@ -22,8 +22,8 @@ for num_nii = 4 : length(slices_nii_file)
      disp(case_name)
     
     v_slices = load_untouch_nii([train_test_data_slices, case_name, '.nii.gz']);  
-    v_masks = load_untouch_nii([train_test_data_masks, case_name, '.manual.mask.nii.gz']);
-    %v_masks = load_untouch_nii([train_test_data_masks, case_name, '_ss.nii.gz']);
+    %v_masks = load_untouch_nii([train_test_data_masks, case_name, '.manual.mask.nii.gz']);
+    v_masks = load_untouch_nii([train_test_data_masks, case_name, '_ss.nii.gz']);
     slices_tif = v_slices.img;
     masks_tif = v_masks.img;    
     %masks_tif = zeros(size(slices_tif));
@@ -107,7 +107,9 @@ function [] = save_preprocessed_images(slices, mask, slices_destination_path, ma
         imageSlices = repmat(imageSlices,[1,1,3]);
         maskSlices(maskSlices==255) = 1;
         %saveastiff(imageSlices, [slices_destination_path prefix '_' num2str(easy_sort + startSlice) '.tif']);
-        imwrite(imageSlices, [slices_destination_path prefix '_' num2str(easy_sort + startSlice) '.bmp'], 'bmp');       
+        figure(1)
+        imshow(maskSlices,[0, 1])
+        imwrite(imageSlices, [slices_destination_path prefix '_' num2str(easy_sort + startSlice) '.bmp'], 'bmp');               
         imwrite(maskSlices, [masks_destination_path prefix '_' num2str(easy_sort + startSlice) '.bmp'], 'bmp');
     end
 
