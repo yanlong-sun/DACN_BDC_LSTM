@@ -3,7 +3,7 @@ import tensorflow as tf
 
 def convlstm2d(inputs, filters, kernel_size, stride=1, padding='SAME', data_format='channels_last',
                go_backwards=False, return_sequences=True):
-    outputs = tf.keras.layers.ConvLSTM2D(filters, kernel_size, stride, data_format=data_format, padding=padding,
+    outputs = tf.keras.layers.ConvLSTM2D(filters, kernel_size, stride, activation='relu', data_format=data_format, padding=padding,
                                          go_backwards=go_backwards, return_sequences=return_sequences)(inputs)
     return outputs
 

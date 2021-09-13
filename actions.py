@@ -117,6 +117,7 @@ class Actions(object):
         train_reader = H5DataLoader(self.conf.data_dir + self.conf.train_data)
         valid_reader = H5DataLoader(self.conf.data_dir + self.conf.valid_data)
         self.sess.run(tf.local_variables_initializer())
+
         for epoch_num in range(self.conf.max_epoch):
             if epoch_num % 10 == 1:
                 print('training step: ' + str(epoch_num) + '/' + str(self.conf.max_epoch))

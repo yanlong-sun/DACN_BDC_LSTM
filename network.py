@@ -91,8 +91,3 @@ class UNet(object):
         print('outputs_shape:   ', outputs.get_shape())
 
         return outputs
-
-
-
-
-
