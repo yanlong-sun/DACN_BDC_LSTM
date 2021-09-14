@@ -146,7 +146,7 @@ class Actions(object):
 
                 # train
                 inputs, annotations = train_reader.next_batch(self.conf.batch)
-                feed_dict = {self.inputs: inputs, self.annotations: annotations[:, 4, :, :], self.is_train: True}
+                feed_dict = {self.inputs: inputs, self.annotations: annotations, self.is_train: True}
                 _, loss, accuracy = self.sess.run([self.train_op, self.loss_op, self.accuracy_op], feed_dict=feed_dict)
                 out, gt = self.sess.run([self.out, self.gt], feed_dict=feed_dict)
                 dice = dice_coeff(gt, out)
@@ -165,7 +165,7 @@ class Actions(object):
                 np.save(self.conf.record_dir + 'train_acc.npy', np.array(train_acc_list))
             else:
                 inputs, annotations = train_reader.next_batch(self.conf.batch)
-                feed_dict = {self.inputs: inputs, self.annotations: annotations[:, 4, :, :], self.is_train: True}
+                feed_dict = {self.inputs: inputs, self.annotations: annotations, self.is_train: True}
                 _, loss = self.sess.run([self.train_op, self.loss_op], feed_dict=feed_dict)
 
             if epoch_num % self.conf.save_step == 1:
@@ -189,7 +189,7 @@ class Actions(object):
             if inputs.shape[0] < self.conf.batch:
                 break
 
-            feed_dict = {self.inputs: inputs, self.annotations: annotations[:, 4, :, :], self.is_train: False}
+            feed_dict = {self.inputs: inputs, self.annotations: annotations, self.is_train: False}
             pred_result = self.sess.run(self.decoded_net_pred, feed_dict=feed_dict)
             pred_result = pred_result
 
