@@ -81,12 +81,9 @@ class UNet(object):
 
         # outputs
 
-        branch1 = ops.convlstm2d(outputs, 32, 3)
-        branch1 = ops.convlstm2d(branch1, 1, 3, return_sequences=False)
-        branch2 = ops.convlstm2d(outputs, 32, 3)
-        branch2 = ops.convlstm2d(branch2, 1, 3, return_sequences=False)
-        branch3 = ops.convlstm2d(outputs, 32, 3)
-        branch3 = ops.convlstm2d(branch3, 2, 3, return_sequences=False)
+        branch1 = ops.convlstm2d(outputs, 1, 3, return_sequences=False)
+        branch2 = ops.convlstm2d(outputs, 1, 3, return_sequences=False)
+        branch3 = ops.convlstm2d(outputs, 2, 3, return_sequences=False)
         outputs = tf.concat([branch1, branch2, branch3], 3)
         print('outputs_shape:   ', outputs.get_shape())
 
